@@ -75,10 +75,15 @@ WSGI_APPLICATION = 'amxinvest.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
+# mysql
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'amxinvest',
+        'USER': 'mysql_user',
+        'PASSWORD': 'mysql_password',
+        'HOST': 'mysql_host',
+        'PORT': 'mysql_port'
     }
 }
 
@@ -122,12 +127,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+# Config for qcloud sms service
 SMS_CONFIG = {
-    'appid': os.environ.get('APPID', ''),
-    'appkey': os.environ.get('APPKEY', ''),
-    'sign': os.environ.get('SIGN', '')
+    'appid': 'APPID',
+    'appkey': 'APPKEY',
+    'sign': 'SIGN'
 }
 
-SMS_TEMPLATE_ID = os.environ.get('TEMPLATE_ID', '')
+# qcloud sms template id
+SMS_TEMPLATE_ID = 'TEMPLATE_ID'
 
-SMS_RECEIVERS = os.environ.get('RECEIVERS', '').split(',')
+SMS_RECEIVERS = ['RECEIVER1']
