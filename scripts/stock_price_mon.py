@@ -15,6 +15,14 @@ import datetime
 import time
 from utils.sms import SmsService
 from django.conf import settings
+import sys
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    stream=sys.stdout
+)
 
 
 def get_holidays():
@@ -69,7 +77,7 @@ def is_trade_time(dt):
 def is_trade_day(dt):
     if dt.weekday() in [5, 6]:
         return False
-    date = dt.strftime('%Y-%d-%m')
+    date = dt.strftime('%Y-%m-%d')
     if date in holidays:
         return False
     return True
@@ -86,10 +94,10 @@ def monitor():
             highest_ratio = (v['high'] / v['close']) - 1
             lowest_ratio = (v['low'] / v['close']) - 1
             if current_ratio >= hold_stocks[k]['raise_ratio'] or highest_ratio >= hold_stocks[k]['raise_ratio']:
-                print('{}({})涨幅超过5%'.format(v['name'], k))
+                logging.info('{}({})涨幅超过5%'.format(v['name'], k))
                 action(now, k, v['name'], '涨幅超过5%')
             elif current_ratio <= 0 - hold_stocks[k]['drop_ratio'] or lowest_ratio <= 0 - hold_stocks[k]['drop_ratio']:
-                print('{}({})跌幅超过5%'.format(v['name'], k))
+                logging.info('{}({})跌幅超过5%'.format(v['name'], k))
                 action(now, k, v['name'], '跌幅超过5%')
 
 
@@ -98,10 +106,11 @@ def action(dt, code, name, msg):
         day = dt.strftime('%Y-%m-%d')
         t = dt.strftime('%H:%M:%S')
         count = count_sms_log(code, day)
-        if count <= 2:
+        if count < 2:
             sms_service.send_msg(settings.SMS_RECEIVERS, settings.SMS_TEMPLATE_ID, code, '{}{}'.format(name, msg))
             log = SmsLog(day=day, time=t, code=code)
             log.save()
+            logging.info('Sent sms for {} due to {}'.format(code, msg))
     except Exception as e:
         logging.error('Failed to process action for {} due to: {}'.format(code, e))
 
